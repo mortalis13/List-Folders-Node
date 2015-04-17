@@ -133,6 +133,11 @@ ScanDirectory.prototype={
     return icon
   },
   
+  replaceTemplate: function(tmpl, replacement, text){
+    var text=text.replace(tmpl, replacement)
+    return text
+  },
+  
 // --------------------------------------------- wrappers ---------------------------------------------
   
   wrapDir: function(dir){
@@ -174,7 +179,7 @@ ScanDirectory.prototype={
   },
   
   exportTree: function(){
-    var exportPath, treeName, tmpl
+    var exportPath, treeName, tmpl, doc
     var json, jsonFolder, jsonPath,
     exportDoc, exportJSON
     
@@ -190,6 +195,16 @@ ScanDirectory.prototype={
     exportDoc=treeName+".html";
     exportJSON=treeName+".json";
     
+    doc=fs.readFileSync(tmpl,'utf8')
+    
+    doc=this.replaceTemplate("_jsonPath_", jsonFolder+exportJSON, doc);
+    doc=this.replaceTemplate("_Title_", 'Directory: '+treeName, doc);
+    doc=this.replaceTemplate("_FolderPath_", 'Directory: '+this.path, doc);
+    
+    // $filters=$this->getFiltersText();
+    // $this->replaceTemplate("_Filters_", "Filters: ".$filters, $doc);
+    
+    fs.writeFileSync(exportPath+exportDoc,doc)
     fs.writeFileSync(jsonPath+exportJSON,json)
   },
   
@@ -215,7 +230,4 @@ ScanDirectory.prototype={
   },
 }
 
-// var sd=newS
-
 new ScanDirectory(path)
-// fullScan(path,-1)
