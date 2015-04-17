@@ -9,6 +9,7 @@ function ScanDirectory(path){
   var text
   this.path=path
   this.text=[]
+  this.markup=[]
   
   this.fullScan(this.path,-1)
   if(!this.text.length){
@@ -19,17 +20,29 @@ function ScanDirectory(path){
   text=this.text.join('\n')
   console.log(text)
   
-  var exportPath, ext, filename
-  
-  exportPath='export/text/';
-  
-  ext=".txt";
-  name=this.getExportName(ext);
-  
-  fs.writeFileSync(exportPath+name,text)
+  this.exportText(text)
+  this.exportMarkup()
 }
 
 ScanDirectory.prototype={
+  
+  exportText: function(text){
+    var exportPath, ext, filename
+    exportPath='export/text/';
+    ext=".txt";
+    name=this.getExportName(ext);
+    fs.writeFileSync(exportPath+name,text)
+  },
+  
+  exportMarkup: function(){
+    var exportPath, ext, filename, markup
+    markup=this.markup.join('\n')
+    markup=this.wrapMarkup(markup)
+    exportPath='export/markup/';
+    ext=".html";
+    name=this.getExportName(ext);
+    fs.writeFileSync(exportPath+name,markup)
+  },
   
   fullScan: function(dir,level){
     var self=this,
@@ -47,11 +60,13 @@ ScanDirectory.prototype={
       
       if(self.is_dir(item)){
         var currentDir='['+value+']'
+        self.markup.push(pad+self.wrapDir(currentDir))
         self.text.push(pad+currentDir)
         var res=self.fullScan(item,level+1)
       }
       else{
         var currentFile=value
+        self.markup.push(pad+self.wrapFile(currentFile))
         self.text.push(pad+currentFile)
       }
       
@@ -91,7 +106,6 @@ ScanDirectory.prototype={
     }
     
     name=exportName;
-      debugger
     if(ext)
       name=exportName+ext;
     
@@ -124,6 +138,24 @@ ScanDirectory.prototype={
       resPad+=pad
     return resPad
   },
+  
+  wrapDir: function(dir){
+    return '<span class="directory">'+dir+'</span>';
+  },
+  
+  wrapFile: function(file){
+    return '<span class="file">'+file+'</span>';
+  },
+  
+  wrapMarkup: function(markup){
+    markup='<pre>'+nl+markup+nl+'</pre>';
+    markup=this.wrapDocument(markup);
+    return markup;
+  },
+  
+  wrapDocument: function(markup){
+    return '<meta charset="utf-8">'+nl+markup
+  }
 }
 
 // var sd=newS
