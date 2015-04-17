@@ -6,12 +6,27 @@ var text=""
 var nl='\n'
 
 function ScanDirectory(path){
+  var text
   this.path=path
-  this.text=""
+  this.text=[]
   
   this.fullScan(this.path,-1)
-  if(!this.text) console.log("No Data!")
-  console.log(this.text)
+  if(!this.text.length){
+    console.log("No Data!")
+    return
+  } 
+    
+  text=this.text.join('\n')
+  console.log(text)
+  
+  var exportPath, ext, filename
+  
+  exportPath='export/text/';
+  
+  ext=".txt";
+  name=this.getExportName(ext);
+  
+  fs.writeFileSync(exportPath+name,text)
 }
 
 ScanDirectory.prototype={
@@ -32,12 +47,12 @@ ScanDirectory.prototype={
       
       if(self.is_dir(item)){
         var currentDir='['+value+']'
-        self.text+=pad+currentDir+nl
+        self.text.push(pad+currentDir)
         var res=self.fullScan(item,level+1)
       }
       else{
         var currentFile=value
-        self.text+=pad+currentFile+nl
+        self.text.push(pad+currentFile)
       }
       
     })
@@ -59,6 +74,28 @@ ScanDirectory.prototype={
     
     list=this.getList(folders,files)
     return list;
+  },
+  
+  getExportName: function(ext){
+    var useCurrentDir,exportName, name
+    
+    useCurrentDir=false;
+    exportName="no-name";
+    
+    useCurrentDir=true;
+    
+    if(useCurrentDir){
+      var rx=new RegExp("\/[^\/]+$")
+      exportName=rx.exec(this.path);
+      exportName=exportName[0].substr(1);
+    }
+    
+    name=exportName;
+      debugger
+    if(ext)
+      name=exportName+ext;
+    
+    return name;
   },
 
   filterFile: function(value){
