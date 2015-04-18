@@ -100,7 +100,16 @@ function show(res, url, text) {
         })
         
         function setVal(id,value){
-          $('#'+id).attr('value',value)
+          var elem=$('#'+id)
+          var tag=elem[0].tagName.toLowerCase()
+          switch(tag){
+            case 'input':
+              elem.attr('value',value)
+              break
+            case 'textarea':
+              elem.html(value)
+              break
+          }
         }
       }
       else

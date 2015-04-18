@@ -9,14 +9,20 @@ exports.ScanDirectory=function(post){
   var path, filterExt, excludeExt, filterDir
   
   this.path=this.formatPath(post.path)
-  this.filterExt=post.filterExt
-  this.excludeExt=post.excludeExt
-  this.filterDir=post.filterDir
+  this.filterExt=this.getFilters(post.filter_ext)
+  this.excludeExt=this.getFilters(post.exclude_ext)
+  this.filterDir=this.getFilters(post.filter_dir)
+  
+  console.log('filterExt: '+this.filterExt+'\n')
+  console.log('excludeExt: '+this.excludeExt+'\n')
+  console.log('filterDir: '+this.filterDir+'\n')
   
   this.doExportText=post.export_text
   this.doExportMarkup=post.export_markup
   this.doExportTree=post.export_tree
   
+  this.exportName=this.trim(post.export_name)
+  // this.exportName=post.export_name && post.export_name.trim()
   this.iconsPath="./lib/images/"
   
   this.text=[]
@@ -90,8 +96,6 @@ exports.ScanDirectory.prototype={
       return
     } 
     
-    debugger
-      
     text=this.text.join('\n')
     exports.text=this.wrapText(text)
     
@@ -105,7 +109,7 @@ exports.ScanDirectory.prototype={
     
   fullScan: function(dir,level){
     var self=this,
-    data,list,pad,count
+    data,list,pad,count,passed
     var json=[]
     
     data=fs.readdirSync(dir)
@@ -119,6 +123,13 @@ exports.ScanDirectory.prototype={
       var item=dir+'/'+value
       
       if(self.is_dir(item)){
+        passed=true;
+        debugger
+        if(self.filterDir && level==-1){
+          passed=self.filterDirectory(value);         // filter directories
+        }
+        if(!passed) return
+        
         var currentDir='['+value+']'
         self.markup.push(pad+self.wrapDir(currentDir))
         self.text.push(pad+currentDir)
@@ -172,13 +183,15 @@ exports.ScanDirectory.prototype={
 // --------------------------------------------- helpers ---------------------------------------------
 
   formatPath: function(path){
+    path=path.replace(/\\/g,"/")
+    path=path.trim()
+    
+    if(path.substr(-1)=="/")
+      path=path.substr(0,path.length-1)
+    
     return path
   },
   
-  filterFile: function(value){
-    return true
-  },
-
   is_dir: function(item){
     var stat=fs.statSync(item)
     var res=stat && stat.isDirectory()
@@ -266,6 +279,53 @@ exports.ScanDirectory.prototype={
     return icon;
   },
   
+  getFilters: function(filter){
+    filter=filter && filter.trim();
+    
+    if(filter){
+      filter=filter.split("\n");
+      for(var i in filter){
+        filter[i]=filter[i].trim()
+      }
+    }
+    return filter;
+  },
+  
+  filterFile: function(value){
+    
+    if(this.excludeExt){
+      for(var i in this.excludeExt){
+        var ext=this.excludeExt[i]
+        var rx=new RegExp("\\."+ext+"$")
+        if(rx.test(value))
+          return false
+      }
+      return true;
+    }
+    
+    if(!this.filterExt) return true;
+    for(var i in this.filterExt){
+      var ext=this.filterExt[i]
+      var rx=new RegExp("\\."+ext+"$")
+      if(rx.test(value))
+        return true
+    }
+    return false;
+  },
+  
+  filterDirectory: function(dir){
+    for(var i in this.filterDir) {
+      var filter=this.filterDir[i]
+      if(filter==dir)
+        return true;
+    }
+    return false;
+  },
+  
+  trim: function(value){
+    return value && value.trim()
+  },
+  
 // --------------------------------------------- wrappers ---------------------------------------------
   
   wrapDir: function(dir){
@@ -341,12 +401,15 @@ exports.ScanDirectory.prototype={
   },
   
   getExportName: function(ext){
-    var useCurrentDir,exportName, name
-    
-    useCurrentDir=false;
-    exportName="no-name";
+    var useCurrentDir,exportName,name
     
     useCurrentDir=true;
+    exportName="no-name";
+    
+    if(this.exportName){
+      exportName=this.exportName
+      useCurrentDir=false;
+    }
     
     if(useCurrentDir){
       var rx=new RegExp("/[^/]+$")
