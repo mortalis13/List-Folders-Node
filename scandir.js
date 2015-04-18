@@ -13,17 +13,13 @@ exports.ScanDirectory=function(post){
   this.excludeExt=this.getFilters(post.exclude_ext)
   this.filterDir=this.getFilters(post.filter_dir)
   
-  console.log('filterExt: '+this.filterExt+'\n')
-  console.log('excludeExt: '+this.excludeExt+'\n')
-  console.log('filterDir: '+this.filterDir+'\n')
-  
   this.doExportText=post.export_text
   this.doExportMarkup=post.export_markup
   this.doExportTree=post.export_tree
   
   this.exportName=this.trim(post.export_name)
-  // this.exportName=post.export_name && post.export_name.trim()
   this.iconsPath="./lib/images/"
+  this.pad="    "
   
   this.text=[]
   this.markup=[]
@@ -199,12 +195,9 @@ exports.ScanDirectory.prototype={
   },
 
   getPadding: function(level){
-    var pad,resPad
-    pad='    '
-    resPad=""
-    
+    var resPad=""
     for(var i=0;i<=level;i++)
-      resPad+=pad
+      resPad+=this.pad
     return resPad
   },
   

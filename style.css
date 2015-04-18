@@ -51,11 +51,14 @@ input#path{
 }
 
 .form-container,
-.manage-options {
+.manage-options-wrap {
   display: inline-block;
   vertical-align: top;
-  border: 1px solid #AAA;
   margin: 1em 1em 1em 0;
+}
+.form-container,
+.manage-options {
+  border: 1px solid #AAA;
   border-radius: 10px;
   background: #FFF9EC;
 }
@@ -131,10 +134,15 @@ input#path{
 
 /* ------------------------------- options ------------------------------- */
 
-.manage-options {
+.manage-options-wrap{
   vertical-align: top;
+  display: inline-block;
+}
+
+.manage-options {
   padding: 1em;
   width: 300px;
+  margin-bottom: 0.5em;
 }
 
 .control-block .title{
@@ -158,4 +166,18 @@ input#path{
 .manage-options #option-name,
 .manage-options #options-list option{
   padding: 0.3em;
+}
+
+.msg-add,
+.msg-remove{
+  text-align: center;
+  font-style: italic;
+  font-size: 0.95em;
+}
+
+.msg-add{
+  color: #449344;
+}
+.msg-remove{
+  color: #A56161;
 }

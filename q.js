@@ -7,27 +7,22 @@ var fs = require('fs');
 var jQuery = require('jquery')
 var jsdom = require("jsdom")
 var qs = require('querystring');
-var mysql=require('mysql')
 
 var scandir = require("./scandir.js")
 var ScanDirectory = scandir.ScanDirectory
 
+var db=require('./includes/database.js')
+var man_opt=require('./includes/manage_options.js')
+
 var root = __dirname;
 var post={}
-var config_table='config'
 
 var port=3000, host='localhost'
-
-var db = mysql.createConnection({
-  host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'list_folders_node'
-});
 
 var server = http.createServer(function(req, res){
   var url = parse(req.url).pathname;
   if(url=='/') url='index.html'
+  scandir.text=""
 
   switch(req.method){
     case 'GET':
@@ -43,22 +38,58 @@ server.listen(port);
 console.log("Listening to port 3000 ...")
 
 function doPost(req, res, url){
+  var body = '';
+  req.on('data', function(chunk){ body += chunk });
+  
   if(url=='index.html'){
-    
-    var body = '';
     req.setEncoding('utf8');
-    req.on('data', function(chunk){ body += chunk });
     req.on('end', function(){
       post = qs.parse(body);
-      var path=post.path
-      
+
       new ScanDirectory(post)
       var value=JSON.stringify(post)
-      updateConfig('last', value)
+      db.updateConfig('last', value)
       
       show(res, url);
     });
+  }else if(url=='/manage-options'){
+    req.on('end', function(){
+      post = qs.parse(body);
+      var action=post.action
+      var result
+      
+      switch(action){
+        case 'add':
+          addOption(res,post)
+          break
+        case 'remove':
+          removeOption(res,post)
+          break
+        case 'load':
+          loadOption(res,post)
+          break
+      }
+    })
   }
+}
+
+function addOption(res, post) {
+  var result=man_opt.addOption(post)
+  res.setHeader("Content-Type", "text/plain");
+  result && res.end('option-add')
+}
+
+function removeOption(res, post) {
+  var result=man_opt.removeOption(post)
+  res.setHeader("Content-Type", "text/plain");
+  result && res.end('option-remove')
+}
+
+function loadOption(res, post) {
+  man_opt.loadOption(post,function(result){
+    res.setHeader("Content-Type", "text/plain");
+    result && res.end(result)
+  })
 }
 
 function show(res, url, text) {
@@ -74,11 +105,10 @@ function show(res, url, text) {
       
     jsdom.env(body, function(err, window){
       if(url=='index.html'){
-        var last,path,filterExt,excludeExt,filterDir
+        var last,path,filterExt,excludeExt,filterDir,optionsList
         var $=jQuery(window)
         
-        
-        loadOptions(function(last){
+        db.loadOptions(function(last){
           if(last){
             last=JSON.parse(last)
             path=last.path
@@ -92,11 +122,19 @@ function show(res, url, text) {
           setVal('exclude-ext',excludeExt)
           setVal('filter-dir',filterDir)
           
-          var html=$('html').html()
-          if(scandir.text) html+=scandir.text
-          body='<html>'+html+'</html>'
-          
-          res.end(body)
+          db.listOptions(function(data){
+            if(!data)
+              optionsList="-No options-";
+            optionsList=wrapOptions(data);
+            
+            $('#options-list').html(optionsList)
+            
+            var html=$('html').html()
+            if(scandir.text) html+=scandir.text
+            body='<html>'+html+'</html>'
+            
+            res.end(body)
+          });
         })
         
         function setVal(id,value){
@@ -118,54 +156,14 @@ function show(res, url, text) {
   })
 }
 
-function updateConfig(name, value){
-  var sql
-  var table=config_table;
-      
-  sql="select name from "+table+" where name=?";
-  db.query(
-    sql,
-    [name],
-    function(err, rows){
-      if(err) throw err
-        
-      if(!rows.length){
-        addConfig(name,value)
-        return
-      }
-      
-      sql="update "+table+" set value=? where name=?"
-      db.query(
-        sql,
-        [value,name]
-      )
-    }
-  )
+function wrapOptions(list){
+  if(typeof list=='string')
+    return '<option value="-1">'+list+"</option>";
   
-}
-
-function addConfig(name,value){
-  var table=config_table;
-  var sql="insert into "+table+" (name,value) values(?,?)";
-  
-  db.query(
-    sql,
-    [name,value]
-  )
-}
-
-function loadOptions(cb){
-  var table=config_table;
-  sql="select value from "+table+" where name='last'";
-  db.query(
-    sql,
-    function(err, rows){
-      if(err) throw err
-        
-      res=false
-      if(rows.length) 
-        res=rows[0].value
-      cb(res)
-    }
-  )
+  for(var i in list){
+    var option=list[i]
+    list[i]="<option value="+option+">"+option+"</option>";
+  }
+  list=list.join("\n");
+  return list;
 }
