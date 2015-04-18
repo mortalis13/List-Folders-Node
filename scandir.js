@@ -17,8 +17,62 @@ exports.ScanDirectory=function(post){
   this.doExportMarkup=post.export_markup
   this.doExportTree=post.export_tree
   
+  this.iconsPath="./lib/images/"
+  
   this.text=[]
   this.markup=[]
+  
+  this.exts=[
+    "chm",
+    "css",
+    "djvu",
+    "dll",
+    "doc",
+    "exe",
+    "html",
+    "iso",
+    "js",
+    "msi",
+    "pdf",
+    "php",
+    "psd",
+    "rar",
+    "txt",
+    "xls",
+    "xml",
+    "xpi",
+    "zip",
+  ]
+
+  this.imageExts=[
+    "png",
+    "gif",
+    "jpg",
+    "jpeg",
+    "tiff",
+    "bmp",
+  ]
+
+  this.musicExts=[
+    "mp3",
+    "wav",
+    "ogg",
+    "alac",
+    "flac",
+  ]
+
+  this.videoExts=[
+    "mkv",
+    "flv",
+    "vob",
+    "avi",
+    "wmv",
+    "mov",
+    "mp4",
+    "mpg",
+    "mpeg",
+    "3gp",
+  ]
   
   this.processData()
 }
@@ -145,20 +199,71 @@ exports.ScanDirectory.prototype={
     return value
   },
   
-  getIcon: function(file){
-    var ext, icon, path, iconExt
-    
-    ext="";
-    icon="jstree-file";
-    // path=this.iconsPath;
-    iconExt=".png";
-    
-    return icon
-  },
-  
   replaceTemplate: function(tmpl, replacement, text){
     var text=text.replace(tmpl, replacement)
     return text
+  },
+  
+  getIcon: function(file){
+    var ext, icon, path, iconExt, useDefault 
+    
+    ext="";
+    icon="jstree-file";
+    path=this.iconsPath;
+    iconExt=".png";
+    
+    var rx=new RegExp("\\.[\\w]+$")
+    ext=rx.exec(file)
+    if(!ext.length) return icon;
+    ext=ext[0].substr(1);
+    
+    useDefault=true;
+    
+    if(useDefault){
+      for(var i in this.exts){
+        var item=this.exts[i]
+        if(ext==item){
+          icon=path+item+iconExt;
+          useDefault=false;
+          break;
+        }
+      }
+    }
+    
+    if(useDefault){
+      for(var i in this.imageExts){
+        var item=this.imageExts[i]
+        if(ext==item){
+          icon=path+"image"+iconExt;
+          useDefault=false;
+          break;
+        }
+      }
+    }
+    
+    if(useDefault){
+      for(var i in this.musicExts){
+        var item=this.musicExts[i]
+        if(ext==item){
+          icon=path+"music"+iconExt;
+          useDefault=false;
+          break;
+        }
+      }
+    }
+    
+    if(useDefault){
+      for(var i in this.videoExts){
+        var item=this.videoExts[i]
+        if(ext==item){
+          icon=path+"video"+iconExt;
+          useDefault=false;
+          break;
+        }
+      }
+    }
+    
+    return icon;
   },
   
 // --------------------------------------------- wrappers ---------------------------------------------
@@ -244,7 +349,7 @@ exports.ScanDirectory.prototype={
     useCurrentDir=true;
     
     if(useCurrentDir){
-      var rx=new RegExp("\/[^\/]+$")
+      var rx=new RegExp("/[^/]+$")
       exportName=rx.exec(this.path);
       exportName=exportName[0].substr(1);
     }
