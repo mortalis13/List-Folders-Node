@@ -2,7 +2,7 @@
 var fs=require('fs')
 var path="C:/1-Roman/Documents/8-test/test"
 
-var text=""
+exports.text=""
 var nl='\n'
 
 exports.ScanDirectory=function(path){
@@ -21,7 +21,8 @@ exports.ScanDirectory=function(path){
   } 
     
   text=this.text.join('\n')
-  console.log(text)
+  text=this.wrapText(text)
+  exports.text=text
   
   // this.exportTree()
   // this.exportText(text)
@@ -146,6 +147,10 @@ exports.ScanDirectory.prototype={
   
   wrapFile: function(file){
     return '<span class="file">'+file+'</span>';
+  },
+  
+  wrapText: function(text){
+    return '<pre>'+text+'</pre>';
   },
   
   wrapMarkup: function(markup){

@@ -9,7 +9,8 @@ var jsdom = require("jsdom")
 var qs = require('querystring');
 var mysql=require('mysql')
 
-var ScanDirectory = require("./scandir.js").ScanDirectory
+var scandir = require("./scandir.js")
+var ScanDirectory = scandir.ScanDirectory
 
 var root = __dirname;
 var post={}
@@ -60,7 +61,7 @@ function doPost(req, res, url){
   }
 }
 
-function show(res, url) {
+function show(res, url, text) {
   var path = join(root, url);
   var body=""
   
@@ -92,6 +93,7 @@ function show(res, url) {
           setVal('filter-dir',filterDir)
           
           var html=$('html').html()
+          if(scandir.text) html+=scandir.text
           body='<html>'+html+'</html>'
           
           res.end(body)
