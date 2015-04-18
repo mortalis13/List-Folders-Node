@@ -5,32 +5,50 @@ var path="C:/1-Roman/Documents/8-test/test"
 exports.text=""
 var nl='\n'
 
-exports.ScanDirectory=function(path){
-  var text,json
+exports.ScanDirectory=function(post){
+  var path, filterExt, excludeExt, filterDir
   
-  this.path=path
+  this.path=this.formatPath(post.path)
+  this.filterExt=post.filterExt
+  this.excludeExt=post.excludeExt
+  this.filterDir=post.filterDir
+  
+  this.doExportText=post.export_text
+  this.doExportMarkup=post.export_markup
+  this.doExportTree=post.export_tree
+  
   this.text=[]
   this.markup=[]
   
-  json=this.fullScan(this.path,-1)
-  this.json=JSON.stringify(json)
-  
-  if(!this.text.length){
-    console.log("No Data!")
-    return
-  } 
-    
-  text=this.text.join('\n')
-  text=this.wrapText(text)
-  exports.text=text
-  
-  // this.exportTree()
-  // this.exportText(text)
-  // this.exportMarkup()
+  this.processData()
 }
 
 exports.ScanDirectory.prototype={
   
+  processData: function(){
+    var text,json
+    
+    json=this.fullScan(this.path,-1)
+    this.json=JSON.stringify(json)
+    
+    if(!this.text.length){
+      console.log("No Data!")
+      return
+    } 
+    
+    debugger
+      
+    text=this.text.join('\n')
+    exports.text=this.wrapText(text)
+    
+    if(this.doExportText)
+      this.exportText(text)
+    if(this.doExportMarkup)
+      this.exportMarkup()
+    if(this.doExportTree)
+      this.exportTree()
+  },
+    
   fullScan: function(dir,level){
     var self=this,
     data,list,pad,count
@@ -99,6 +117,10 @@ exports.ScanDirectory.prototype={
   
 // --------------------------------------------- helpers ---------------------------------------------
 
+  formatPath: function(path){
+    return path
+  },
+  
   filterFile: function(value){
     return true
   },

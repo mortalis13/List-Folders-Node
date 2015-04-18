@@ -52,7 +52,7 @@ function doPost(req, res, url){
       post = qs.parse(body);
       var path=post.path
       
-      new ScanDirectory(path)
+      new ScanDirectory(post)
       var value=JSON.stringify(post)
       updateConfig('last', value)
       
