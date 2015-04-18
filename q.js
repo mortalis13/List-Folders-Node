@@ -15,6 +15,8 @@ var root = __dirname;
 var post={}
 var config_table='config'
 
+var port=3000, host='localhost'
+
 var db = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
@@ -36,7 +38,8 @@ var server = http.createServer(function(req, res){
   }
 });
 
-server.listen(3000);
+server.listen(port);
+console.log("Listening to port 3000 ...")
 
 function doPost(req, res, url){
   if(url=='index.html'){
