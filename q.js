@@ -3,15 +3,24 @@ var http = require('http');
 var parse = require('url').parse;
 var join = require('path').join;
 var fs = require('fs');
-var qs = require('querystring');
 
 var jQuery = require('jquery')
 var jsdom = require("jsdom")
+var qs = require('querystring');
+var mysql=require('mysql')
 
 var ScanDirectory = require("./scandir.js").ScanDirectory
 
 var root = __dirname;
 var post={}
+var config_table='config'
+
+var db = mysql.createConnection({
+  host: '127.0.0.1',
+  user: 'root',
+  password: '',
+  database: 'list_folders_node'
+});
 
 var server = http.createServer(function(req, res){
   var url = parse(req.url).pathname;
@@ -40,6 +49,8 @@ function doPost(req, res, url){
       var path=post.path
       
       new ScanDirectory(path)
+      var value=JSON.stringify(post)
+      updateConfig('last', value)
       
       show(res, url);
     });
@@ -57,22 +68,90 @@ function show(res, url) {
   
   stream.on('end',function(chunk){
       
-    jsdom.env(body, function(err,window){
+    jsdom.env(body, function(err, window){
       if(url=='index.html'){
+        var last,path,filterExt,excludeExt,filterDir
         var $=jQuery(window)
         
-        var path=""
-        if(post){
-          path=post.path
+        
+        loadOptions(function(last){
+          if(last){
+            last=JSON.parse(last)
+            path=last.path
+            filterExt=last.filter_ext;
+            excludeExt=last.exclude_ext;
+            filterDir=last.filter_dir;
+          }
+          
+          setVal('path',path)
+          setVal('filter-ext',filterExt)
+          setVal('exclude-ext',excludeExt)
+          setVal('filter-dir',filterDir)
+          
+          var html=$('html').html()
+          body='<html>'+html+'</html>'
+          
+          res.end(body)
+        })
+        
+        function setVal(id,value){
+          $('#'+id).attr('value',value)
         }
-        
-        $('#path').attr('value',path)
-        
-        var html=$('html').html()
-        body='<html>'+html+'</html>'
-      } 
-      
-      res.end(body)
+      }
+      else
+        res.end(body)
     })
   })
+}
+
+function updateConfig(name, value){
+  var sql
+  var table=config_table;
+      
+  sql="select name from "+table+" where name=?";
+  db.query(
+    sql,
+    [name],
+    function(err, rows){
+      if(err) throw err
+        
+      if(!rows.length){
+        addConfig(name,value)
+        return
+      }
+      
+      sql="update "+table+" set value=? where name=?"
+      db.query(
+        sql,
+        [value,name]
+      )
+    }
+  )
+  
+}
+
+function addConfig(name,value){
+  var table=config_table;
+  var sql="insert into "+table+" (name,value) values(?,?)";
+  
+  db.query(
+    sql,
+    [name,value]
+  )
+}
+
+function loadOptions(cb){
+  var table=config_table;
+  sql="select value from "+table+" where name='last'";
+  db.query(
+    sql,
+    function(err, rows){
+      if(err) throw err
+        
+      res=false
+      if(rows.length) 
+        res=rows[0].value
+      cb(res)
+    }
+  )
 }

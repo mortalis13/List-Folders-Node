@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jsdom": "^5.0.1"
+    "jsdom": "^5.0.1",
+    "mysql": "^2.6.2"
   }
 }
