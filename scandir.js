@@ -292,7 +292,6 @@ exports.ScanDirectory.prototype={
   },
   
   filterFile: function(value){
-    
     if(this.excludeExt){
       for(var i in this.excludeExt){
         var ext=this.excludeExt[i]
@@ -320,6 +319,22 @@ exports.ScanDirectory.prototype={
         return true;
     }
     return false;
+  },
+  
+  getFiltersText: function(){
+    var filterExt="", filterDir="", filters
+    
+    if(this.filterExt){
+      filterExt=this.filterExt.join(",");
+    }
+    if(this.filterDir){
+      filterDir=this.filterDir.join(",");
+    }
+    
+    filters='Files ['+filterExt+']';
+    filters+=', Directories ['+filterDir+']';
+    
+    return filters;
   },
   
   trim: function(value){
@@ -371,7 +386,7 @@ exports.ScanDirectory.prototype={
   },
   
   exportTree: function(){
-    var exportPath, treeName, tmpl, doc
+    var exportPath, treeName, tmpl, doc, filters
     var json, jsonFolder, jsonPath,
     exportDoc, exportJSON
     
@@ -393,8 +408,8 @@ exports.ScanDirectory.prototype={
     doc=this.replaceTemplate("_Title_", 'Directory: '+treeName, doc);
     doc=this.replaceTemplate("_FolderPath_", 'Directory: '+this.path, doc);
     
-    // $filters=$this->getFiltersText();
-    // $this->replaceTemplate("_Filters_", "Filters: ".$filters, $doc);
+    filters=this.getFiltersText();
+    doc=this.replaceTemplate("_Filters_", "Filters: "+filters, doc);
     
     fs.writeFileSync(exportPath+exportDoc,doc)
     fs.writeFileSync(jsonPath+exportJSON,json)
