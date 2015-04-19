@@ -1,4 +1,6 @@
 
+var openOnStart=true
+
 var http = require('http');
 var parse = require('url').parse;
 var join = require('path').join;
@@ -7,6 +9,7 @@ var fs = require('fs');
 var jQuery = require('jquery')
 var jsdom = require("jsdom")
 var qs = require('querystring');
+var open=require('open')
 
 var scandir = require("./includes/scandir.js")
 var ScanDirectory = scandir.ScanDirectory
@@ -36,6 +39,8 @@ var server = http.createServer(function(req, res){
 
 server.listen(port);
 console.log("Listening to port 3000 ...")
+if(openOnStart)
+  open("http://localhost:"+port, "firefox");
 
 function doPost(req, res, url){
   var body = '';
