@@ -63,6 +63,10 @@ input#path{
   background: #FFF9EC;
 }
 
+#options-form{
+  margin:0;
+}
+
 .page-title{
   margin-bottom: 1.5em;
 }

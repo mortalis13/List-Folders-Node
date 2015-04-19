@@ -1,0 +1,6 @@
+[colores]
+    WinCmdRef.chw
+[lápiz]
+    WinCmdRef.chw
+WinCmdRef.chm
+WinCmdRef.chw

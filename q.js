@@ -8,7 +8,7 @@ var jQuery = require('jquery')
 var jsdom = require("jsdom")
 var qs = require('querystring');
 
-var scandir = require("./scandir.js")
+var scandir = require("./includes/scandir.js")
 var ScanDirectory = scandir.ScanDirectory
 
 var db=require('./includes/database.js')
@@ -131,7 +131,7 @@ function show(res, url, text) {
             
             var html=$('html').html()
             if(scandir.text) html+=scandir.text
-            body='<html>'+html+'</html>'
+            body='<!DOCTYPE html>'+html+'</html>'
             
             res.end(body)
           });
