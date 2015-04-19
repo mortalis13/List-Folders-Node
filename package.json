@@ -1,12 +1,16 @@
 {
-  "name": "http-form",
+  "name": "list-folders",
   "version": "1.0.0",
-  "description": "",
+  "description": "Allows list folders, subfolders and files of a selected directory",
   "main": "q.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/mortalis13/small-projects.git"
+  },
+  "author": "mortalis",
   "license": "ISC",
   "dependencies": {
     "jsdom": "^5.0.1",
