@@ -31,7 +31,7 @@ Use `add/db.sql` file to create database with needed structure. To rename databa
 
 ## Problems
 
-If the following error occurs on `node q` command when the server starts:
+a) If the following error occurs on `node q` command when the server starts:
 
     Unexpected token ILLEGAL
 
@@ -41,5 +41,6 @@ for the `jsdom.js` file which creates `throw` statement
 
 then go to `node_modules/jsdom/lib` and edit `jsdom.js`: replace backticks with single quotes.
 
-PHP version problems with encoding (russian/spanish) seem to not appear in Node.js version.
+
+b) PHP version problems with encoding (russian/spanish) seem to not appear in Node.js version.
 
