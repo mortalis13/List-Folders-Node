@@ -121,7 +121,7 @@ function show(res, url, text) {
           
           db.listOptions(function(data){                        // next nesting level: load options list to show in the dropdown
             if(!data)
-              optionsList="-No options-"
+              data="-No options-"
             optionsList=wrapOptions(data)
             
             $('#options-list').html(optionsList)
