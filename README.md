@@ -13,7 +13,7 @@
 ## Run
 
 1. Open command line.
-2. Enter `cd list-folders`.
+2. Enter `cd list-folders` (or other folder you copeid to).
 3. Enter `npm install`.
 4. Enter `node q`.
 5. Wait until the message "Listening to port 3000 ..." appears.
