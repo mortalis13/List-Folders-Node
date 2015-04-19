@@ -1,7 +1,7 @@
 
 # List Folders (Node.js version)
 
-*See `small-projects` repository `list-folders/node-js`*
+*See [`small-projects`](https://github.com/mortalis13/small-projects/tree/master/list-folders/node-js) repository `list-folders/node-js` folder*
 
 ## Requirements
 
