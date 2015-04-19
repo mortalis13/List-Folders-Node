@@ -31,15 +31,15 @@ Use `add/db.sql` file to create database with needed structure. To rename databa
 
 ## Problems
 
-a) If the following error occurs on `node q` command when the server starts:
+a) If the following error occurs:
 
     Unexpected token ILLEGAL
-
-for the `jsdom.js` file which creates `throw` statement
+    
+on `node q` command when the server starts and it's related to the `jsdom.js` file which creates `throw` statement
 
     throw new RangeError(`Invalid parsingMode option
 
-then go to `node_modules/jsdom/lib` and edit `jsdom.js` and replace backticks with single quotes.
+then go to `node_modules/jsdom/lib`, open `jsdom.js` and replace backticks with single quotes.  
 
 
 b) PHP version problems with encoding (russian/spanish) seem to not appear in Node.js version.
