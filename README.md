@@ -39,7 +39,7 @@ for the `jsdom.js` file which creates `throw` statement
 
     throw new RangeError(`Invalid parsingMode option
 
-then go to `node_modules/jsdom/lib` and edit `jsdom.js`: replace backticks with single quotes.
+then go to `node_modules/jsdom/lib` and edit `jsdom.js` and replace backticks with single quotes.
 
 
 b) PHP version problems with encoding (russian/spanish) seem to not appear in Node.js version.
