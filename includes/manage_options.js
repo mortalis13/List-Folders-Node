@@ -1,6 +1,9 @@
 
 var db=require('./database.js')
 
+/*
+ * Adds option with entered name to the database
+ */
 exports.addOption=function(post){
   var name, value
   name=post.name
@@ -9,6 +12,9 @@ exports.addOption=function(post){
   return true
 }
 
+/*
+ * Removes option selected in the dropdown from the database
+ */
 exports.removeOption=function(post){
   var name, value
   name=post.name
@@ -16,6 +22,9 @@ exports.removeOption=function(post){
   return true
 }
 
+/*
+ * Loads an option selected in the dropdown
+ */
 exports.loadOption=function(post,cb){
   var name, res
   name=post.name

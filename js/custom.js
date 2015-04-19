@@ -106,12 +106,12 @@ $(function(){
         var selected=sel.val()
         
         list.sort(function(a,b) {
-          if (a.text > b.text) return 1;
-          else if (a.text < b.text) return -1;
+          if (a.text > b.text) return 1
+          else if (a.text < b.text) return -1
           else return 0
         })
         
-        sel.empty().append(list);
+        sel.empty().append(list)
         sel.val(selected)
         
         msg('add')
@@ -174,11 +174,14 @@ $(function(){
       },
       'json'
     ).fail(function(error) {
-      alert( "Error: "+error.status+", "+error.statusText );
+      alert( "Error: "+error.status+", "+error.statusText )
     })
     
   })
   
+  /*
+   * Shows message on add/remove option in the Manage Options block
+   */
   function msg(type){
     var msg
     switch(type){

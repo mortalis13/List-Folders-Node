@@ -81,6 +81,11 @@ exports.ScanDirectory=function(post){
 
 exports.ScanDirectory.prototype={
   
+  /*
+   * Scans the directory
+   * Outputs the result as text
+   * Exports result if checkboxes are selected
+   */  
   processData: function(){
     var text,json
     
@@ -103,6 +108,9 @@ exports.ScanDirectory.prototype={
       this.exportTree()
   },
     
+  /*
+   * Recursive scans all subdirectories
+   */
   fullScan: function(dir,level){
     var self=this,
     data,list,pad,count,passed
@@ -118,9 +126,8 @@ exports.ScanDirectory.prototype={
     list.forEach(function(value){
       var item=dir+'/'+value
       
-      if(self.is_dir(item)){
-        passed=true;
-        debugger
+      if(self.isDir(item)){
+        passed=true
         if(self.filterDir && level==-1){
           passed=self.filterDirectory(value);         // filter directories
         }
@@ -153,22 +160,29 @@ exports.ScanDirectory.prototype={
     return json
   },
 
+  /*
+   * Filters files and folders
+   * Sorts by name and directories-first order
+   */
   prepareData: function(data,dir){
     var self=this,
     folders=[], files=[], list
     
     data.forEach(function(value){
       var item=dir+'/'+value
-      if (self.is_dir(item))
+      if (self.isDir(item))
         folders.push(value)
       else if(self.filterFile(value))
         files.push(value)
     })
     
     list=this.getList(folders,files)
-    return list;
+    return list
   },
   
+  /*
+   * Merge folders and files
+   */
   getList: function(folders,files){
     folders.sort()
     files.sort()
@@ -177,7 +191,10 @@ exports.ScanDirectory.prototype={
   },
   
 // --------------------------------------------- helpers ---------------------------------------------
-
+  
+  /*
+   * Formats path, fixes backslashes, trims and removes last slash
+   */
   formatPath: function(path){
     path=path.replace(/\\/g,"/")
     path=path.trim()
@@ -188,50 +205,62 @@ exports.ScanDirectory.prototype={
     return path
   },
   
-  is_dir: function(item){
+  /*
+   * Checks if the item is directory
+   */
+  isDir: function(item){
     var stat=fs.statSync(item)
     var res=stat && stat.isDirectory()
     return res
-  },
-
-  getPadding: function(level){
-    var resPad=""
-    for(var i=0;i<=level;i++)
-      resPad+=this.pad
-    return resPad
   },
   
   fixEncoding: function(value){
     return value
   },
   
+  /*
+   * Replaces strings from the tree template (strings format: '_string_') with the 'replacement' text
+   */
   replaceTemplate: function(tmpl, replacement, text){
     var text=text.replace(tmpl, replacement)
     return text
   },
   
+  /*
+   * Outputs padding spaces for text output depending on nesting level
+   */
+  getPadding: function(level){
+    var resPad=""
+    for(var i=0;i<=level;i++)
+      resPad+=this.pad
+    return resPad
+  },  
+  
+  /*
+   * Returns icon path for the tree view
+   */
   getIcon: function(file){
     var ext, icon, path, iconExt, useDefault 
     
-    ext="";
-    icon="jstree-file";
-    path=this.iconsPath;
-    iconExt=".png";
+    ext=""
+    icon="jstree-file"
+    path=this.iconsPath
+    iconExt=".png"
     
     var rx=new RegExp("\\.[\\w]+$")
     ext=rx.exec(file)
-    if(!ext) return icon;
-    ext=ext[0].substr(1);
+    if(!ext) return icon
+    ext=ext[0].substr(1)
     
-    useDefault=true;
+    useDefault=true
     
     if(useDefault){
       for(var i in this.exts){
         var item=this.exts[i]
         if(ext==item){
-          icon=path+item+iconExt;
-          useDefault=false;
-          break;
+          icon=path+item+iconExt
+          useDefault=false
+          break
         }
       }
     }
@@ -240,9 +269,9 @@ exports.ScanDirectory.prototype={
       for(var i in this.imageExts){
         var item=this.imageExts[i]
         if(ext==item){
-          icon=path+"image"+iconExt;
-          useDefault=false;
-          break;
+          icon=path+"image"+iconExt
+          useDefault=false
+          break
         }
       }
     }
@@ -251,9 +280,9 @@ exports.ScanDirectory.prototype={
       for(var i in this.musicExts){
         var item=this.musicExts[i]
         if(ext==item){
-          icon=path+"music"+iconExt;
-          useDefault=false;
-          break;
+          icon=path+"music"+iconExt
+          useDefault=false
+          break
         }
       }
     }
@@ -262,28 +291,35 @@ exports.ScanDirectory.prototype={
       for(var i in this.videoExts){
         var item=this.videoExts[i]
         if(ext==item){
-          icon=path+"video"+iconExt;
-          useDefault=false;
-          break;
+          icon=path+"video"+iconExt
+          useDefault=false
+          break
         }
       }
     }
     
-    return icon;
+    return icon
   },
   
+  /*
+   * Cleans, trims and checks filters for emptiness
+   */
   getFilters: function(filter){
-    filter=filter && filter.trim();
+    filter=filter && filter.trim()
     
     if(filter){
-      filter=filter.split("\n");
+      filter=filter.split("\n")
       for(var i in filter){
         filter[i]=filter[i].trim()
       }
     }
-    return filter;
+    return filter
   },
   
+  /*
+   * Filters file extensions and returns true if the file will be included in the output
+   * If exlude filter is not empty ignores the include filter
+   */
   filterFile: function(value){
     if(this.excludeExt){
       for(var i in this.excludeExt){
@@ -292,44 +328,54 @@ exports.ScanDirectory.prototype={
         if(rx.test(value))
           return false
       }
-      return true;
+      return true
     }
     
-    if(!this.filterExt) return true;
+    if(!this.filterExt) return true
     for(var i in this.filterExt){
       var ext=this.filterExt[i]
       var rx=new RegExp("\\."+ext+"$")
       if(rx.test(value))
         return true
     }
-    return false;
+    return false
   },
   
+  /*
+   * Uses form filter to filter directories from the first scanning level
+   */
   filterDirectory: function(dir){
     for(var i in this.filterDir) {
       var filter=this.filterDir[i]
       if(filter==dir)
-        return true;
+        return true
     }
-    return false;
+    return false
   },
   
+  
+  /*
+   * Gets text for the tree template
+   */
   getFiltersText: function(){
     var filterExt="", filterDir="", filters
     
     if(this.filterExt){
-      filterExt=this.filterExt.join(",");
+      filterExt=this.filterExt.join(",")
     }
     if(this.filterDir){
-      filterDir=this.filterDir.join(",");
+      filterDir=this.filterDir.join(",")
     }
     
-    filters='Files ['+filterExt+']';
-    filters+=', Directories ['+filterDir+']';
+    filters='Files ['+filterExt+']'
+    filters+=', Directories ['+filterDir+']'
     
-    return filters;
+    return filters
   },
   
+  /*
+   * Trims string if it's not null
+   */
   trim: function(value){
     return value && value.trim()
   },
@@ -337,21 +383,21 @@ exports.ScanDirectory.prototype={
 // --------------------------------------------- wrappers ---------------------------------------------
   
   wrapDir: function(dir){
-    return '<span class="directory">'+dir+'</span>';
+    return '<span class="directory">'+dir+'</span>'
   },
   
   wrapFile: function(file){
-    return '<span class="file">'+file+'</span>';
+    return '<span class="file">'+file+'</span>'
   },
   
   wrapText: function(text){
-    return '<pre>'+text+'</pre>';
+    return '<pre>'+text+'</pre>'
   },
   
   wrapMarkup: function(markup){
-    markup='<pre>'+nl+markup+nl+'</pre>';
-    markup=this.wrapDocument(markup);
-    return markup;
+    markup='<pre>'+nl+markup+nl+'</pre>'
+    markup=this.wrapDocument(markup)
+    return markup
   },
   
   wrapDocument: function(markup){
@@ -360,24 +406,39 @@ exports.ScanDirectory.prototype={
   
 // --------------------------------------------- exports ---------------------------------------------
   
+  /*
+   * Exports text in a .txt file
+   */
   exportText: function(text){
     var exportPath, ext, filename
-    exportPath='export/text/';
-    ext=".txt";
-    name=this.getExportName(ext);
+    exportPath='export/text/'
+    ext=".txt"
+    name=this.getExportName(ext)
     fs.writeFileSync(exportPath+name,text)
   },
   
+  /*
+   * Exports markup in a .hmtl file
+   */
   exportMarkup: function(){
     var exportPath, ext, filename, markup
     markup=this.markup.join('\n')
     markup=this.wrapMarkup(markup)
-    exportPath='export/markup/';
-    ext=".html";
-    name=this.getExportName(ext);
+    exportPath='export/markup/'
+    ext=".html"
+    name=this.getExportName(ext)
     fs.writeFileSync(exportPath+name,markup)
   },
   
+  /*
+   * Exports .json and .html files to the 'export/tree'
+   * The .html file can be used directly to view the tree
+   * The jsTree plugin must be in the 'tree/lib'
+   *
+   * The method gets the .html template from 'templates/tree.html', 
+   * replaces template strings with the current data and create new .html in the 'exports/tree'
+   * Then creates .json in the 'exports/tree/json' which is read by the script in the exported .html page
+   */
   exportTree: function(){
     var exportPath, treeName, tmpl, doc, filters
     var json, jsonFolder, jsonPath,
@@ -385,51 +446,55 @@ exports.ScanDirectory.prototype={
     
     json=this.json
     
-    treeName=this.getExportName();
-    tmpl='templates/tree.html';
+    treeName=this.getExportName()
+    tmpl='templates/tree.html'
     
-    exportPath="export/tree/";
-    jsonFolder="json/";
-    jsonPath=exportPath+jsonFolder;
+    exportPath="export/tree/"
+    jsonFolder="json/"
+    jsonPath=exportPath+jsonFolder
     
-    exportDoc=treeName+".html";
-    exportJSON=treeName+".json";
+    exportDoc=treeName+".html"
+    exportJSON=treeName+".json"
     
     doc=fs.readFileSync(tmpl,'utf8')
     
-    doc=this.replaceTemplate("_jsonPath_", jsonFolder+exportJSON, doc);
-    doc=this.replaceTemplate("_Title_", 'Directory: '+treeName, doc);
-    doc=this.replaceTemplate("_FolderPath_", 'Directory: '+this.path, doc);
+    doc=this.replaceTemplate("_jsonPath_", jsonFolder+exportJSON, doc)
+    doc=this.replaceTemplate("_Title_", 'Directory: '+treeName, doc)
+    doc=this.replaceTemplate("_FolderPath_", 'Directory: '+this.path, doc)
     
-    filters=this.getFiltersText();
-    doc=this.replaceTemplate("_Filters_", "Filters: "+filters, doc);
+    filters=this.getFiltersText()
+    doc=this.replaceTemplate("_Filters_", "Filters: "+filters, doc)
     
     fs.writeFileSync(exportPath+exportDoc,doc)
     fs.writeFileSync(jsonPath+exportJSON,json)
   },
   
+  /*
+   * Returns the name that will be used to export 
+   * text, markup and tree views of the directory structure
+   */
   getExportName: function(ext){
     var useCurrentDir,exportName,name
     
-    useCurrentDir=true;
-    exportName="no-name";
+    useCurrentDir=true
+    exportName="no-name"
     
     if(this.exportName){
       exportName=this.exportName
-      useCurrentDir=false;
+      useCurrentDir=false
     }
     
     if(useCurrentDir){
       var rx=new RegExp("/[^/]+$")
-      exportName=rx.exec(this.path);
-      exportName=exportName[0].substr(1);
+      exportName=rx.exec(this.path)
+      exportName=exportName[0].substr(1)
     }
     
-    name=exportName;
+    name=exportName
     if(ext)
-      name=exportName+ext;
+      name=exportName+ext
     
-    return name;
+    return name
   },
 }
 

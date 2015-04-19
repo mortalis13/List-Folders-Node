@@ -6,16 +6,21 @@ var conn = mysql.createConnection({
   user: 'root',
   password: '',
   database: 'list_folders_node'
-});
+})
 
 var config_table='config'
 var options_table='options'
 
-exports.updateOption=function(name, value){
-  var sql
-  var table=options_table;
+/*
+ * Adds or updates option in the 'options' table
+ */
+exports.updateOption=function(name, value, dbtable){
+  var sql, table
   
-  sql="select name from "+table+" where name=?";
+  table=options_table
+  if(dbtable) table=dbtable
+  
+  sql="select name from "+table+" where name=?"
   conn.query(
     sql,
     [name],
@@ -23,7 +28,7 @@ exports.updateOption=function(name, value){
       if(err) throw err
         
       if(!rows.length){
-        addOption(name,value)
+        addOption(name,value,table)
         return
       }
       
@@ -36,63 +41,44 @@ exports.updateOption=function(name, value){
   )
 }
 
+/*
+ * Adds or updates last option in the 'config' table
+ * Redirects to the updateOption()
+ */
 exports.updateConfig=function(name, value){
-  var sql
-  var table=config_table;
-      
-  sql="select name from "+table+" where name=?";
-  conn.query(
-    sql,
-    [name],
-    function(err, rows){
-      if(err) throw err
-        
-      if(!rows.length){
-        addConfig(name,value)
-        return
-      }
-      
-      sql="update "+table+" set value=? where name=?"
-      conn.query(
-        sql,
-        [value,name]
-      )
-    }
-  )
+  exports.updateOption(name,value,config_table)
 }
 
-addConfig=function(name,value){
-  var table=config_table;
-  var sql="insert into "+table+" (name,value) values(?,?)";
-  
+/*
+ * Insert option into the database
+ * helper funtion for updateOption()
+ */
+addOption=function(name,value,table){
+  var sql="insert into "+table+" (name,value) values(?,?)"
   conn.query(
     sql,
     [name,value]
   )
 }
 
-addOption=function(name,value){
-  var table=options_table;
-  var sql="insert into "+table+" (name,value) values(?,?)";
-  
-  conn.query(
-    sql,
-    [name,value]
-  )
-}
-
+/*
+ * Removes option from the database
+ */
 exports.removeOption=function(name){
-  var table=options_table;
-  var sql="delete from "+table+" where name=?";
+  var table=options_table
+  var sql="delete from "+table+" where name=?"
   conn.query(
     sql,
     [name]
   )
 }
 
-exports.loadOptions=function(cb){
-  var table=config_table;
-  sql="select value from "+table+" where name='last'";
+/*
+ * Loads last options from the database to assign them to the form fields
+ */
+exports.loadLastOptions=function(cb){
+  var table=config_table
+  sql="select value from "+table+" where name='last'"
   conn.query(
     sql,
     function(err, rows){
@@ -106,12 +92,15 @@ exports.loadOptions=function(cb){
   )
 }
 
+/*
+ * Loads all options from the database to show them in the dropdown
+ */
 exports.listOptions=function(cb){
   var key,sql
-  var table=options_table;
+  var table=options_table
   
   key='name'
-  sql="select "+key+" from "+table+" order by "+key+" asc";
+  sql="select "+key+" from "+table+" order by "+key+" asc"
   
   conn.query(
     sql,
@@ -129,22 +118,22 @@ exports.listOptions=function(cb){
   )
 }
 
+/*
+ * Retrieves option from the database when an item is selected in the dropdown
+ * to load options set into the form fields
+ */
 exports.getOption=function(name,cb){
   var key,sql
-  var table=options_table;
+  var table=options_table
   
   key='name'
-  sql="select value from "+table+" where name=?";
+  sql="select value from "+table+" where name=?"
 
-  debugger  // getOption:132
-    
   conn.query(
     sql,
     [name],
     function(err, rows){
       if(err) throw err
-        
-      debugger  // getOption:138
         
       res=false
       if(rows.length){
