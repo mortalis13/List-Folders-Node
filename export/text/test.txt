@@ -1,8 +1,0 @@
-[folder1]
-    esp.json
-    q.js
-    q.txt
-[folder2]
-Espanol.txt
-magento.txt
-new.txt
