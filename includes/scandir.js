@@ -25,58 +25,26 @@ exports.ScanDirectory=function(post){
   this.markup=[]
   
   this.exts=[
-    "chm",
-    "css",
-    "djvu",
-    "dll",
-    "doc",
-    "exe",
-    "html",
-    "iso",
-    "js",
-    "msi",
-    "pdf",
-    "php",
-    "psd",
-    "rar",
-    "txt",
-    "xls",
-    "xml",
-    "xpi",
-    "zip",
+    "chm", "css", "djvu", "dll", "doc",
+    "exe", "html", "iso", "js", "msi",
+    "pdf", "php", "psd", "rar", "txt",
+    "xls", "xml", "xpi", "zip",
   ]
 
   this.imageExts=[
-    "png",
-    "gif",
-    "jpg",
-    "jpeg",
-    "tiff",
-    "bmp",
+    "png", "gif", "jpg", "jpeg", "tiff", "bmp",
   ]
 
   this.musicExts=[
-    "mp3",
-    "wav",
-    "ogg",
-    "alac",
-    "flac",
+    "mp3", "wav", "ogg", "alac", "flac",
   ]
 
   this.videoExts=[
-    "mkv",
-    "flv",
-    "vob",
-    "avi",
-    "wmv",
-    "mov",
-    "mp4",
-    "mpg",
-    "mpeg",
-    "3gp",
+    "mkv", "flv", "vob", "avi", "wmv",
+    "mov", "mp4", "mpg", "mpeg", "3gp",
   ]
   
-  this.processData()
+  this.processData()                                   // << Start point >>
 }
 
 exports.ScanDirectory.prototype={
@@ -100,12 +68,9 @@ exports.ScanDirectory.prototype={
     text=this.text.join('\n')
     exports.text=this.wrapText(text)
     
-    if(this.doExportText)
-      this.exportText(text)
-    if(this.doExportMarkup)
-      this.exportMarkup()
-    if(this.doExportTree)
-      this.exportTree()
+    if(this.doExportText) this.exportText(text)
+    if(this.doExportMarkup) this.exportMarkup()
+    if(this.doExportTree) this.exportTree()
   },
     
   /*
@@ -117,11 +82,11 @@ exports.ScanDirectory.prototype={
     var json=[]
     
     data=fs.readdirSync(dir)
-    list=this.prepareData(data,dir)
-    pad=this.getPadding(level)  
+    list=this.prepareData(data,dir)                   // clean of '(".", "..")', filtered dirs and exts, sort by name and put directories first
+    pad=this.getPadding(level)                        // spaces from this.pad
     
     count=list.length
-    // if(!count) return false
+    // if(!count) return false                        // if no files/subdirs or files excluded by filters don't show this dir
       
     list.forEach(function(value){
       var item=dir+'/'+value
@@ -129,17 +94,17 @@ exports.ScanDirectory.prototype={
       if(self.isDir(item)){
         passed=true
         if(self.filterDir && level==-1){
-          passed=self.filterDirectory(value);         // filter directories
+          passed=self.filterDirectory(value);          // filter directories
         }
         if(!passed) return
         
         var currentDir='['+value+']'
-        self.markup.push(pad+self.wrapDir(currentDir))
-        self.text.push(pad+currentDir)
+        self.markup.push(pad+self.wrapDir(currentDir))      // add markup as new line
+        self.text.push(pad+currentDir)                      // add text as new line
         var res=self.fullScan(item,level+1)
         
         json.push({
-          text: self.fixEncoding(value),                   
+          text: self.fixEncoding(value),                    // special json formatting for jsTree.js                   
           children: res
         })
       }

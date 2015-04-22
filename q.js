@@ -189,7 +189,7 @@ function loadOption(res, post) {
  */
 function wrapOptions(list){
   if(typeof list=='string')
-    return '<option value="-1">'+list+"</option>"
+    return '<option value="-1">'+list+"</option>"                 // if no options then wrap the '-No Options-' string
   
   for(var i in list){
     var option=list[i]
