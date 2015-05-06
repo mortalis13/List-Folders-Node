@@ -8,6 +8,10 @@ var nl='\n'
 exports.ScanDirectory=function(post){
   var path, filterExt, excludeExt, filterDir
   
+  this.iconsPath="./lib/images/"
+  this.dirIcon=this.iconsPath+"directory.png"
+  this.pad="    "
+  
   this.path=this.formatPath(post.path)
   this.filterExt=this.getFilters(post.filter_ext)
   this.excludeExt=this.getFilters(post.exclude_ext)
@@ -18,8 +22,6 @@ exports.ScanDirectory=function(post){
   this.doExportTree=post.export_tree
   
   this.exportName=this.trim(post.export_name)
-  this.iconsPath="./lib/images/"
-  this.pad="    "
   
   this.text=[]
   this.markup=[]
@@ -42,6 +44,10 @@ exports.ScanDirectory=function(post){
   this.videoExts=[
     "mkv", "flv", "vob", "avi", "wmv",
     "mov", "mp4", "mpg", "mpeg", "3gp",
+  ]
+  
+  this.codeExts =[
+    "c", "cpp", "cs", "java",
   ]
   
   this.processData()                                   // << Start point >>
@@ -82,7 +88,7 @@ exports.ScanDirectory.prototype={
     var json=[]
     
     data=fs.readdirSync(dir)
-    list=this.prepareData(data,dir)                   // clean of '(".", "..")', filtered dirs and exts, sort by name and put directories first
+    list=this.prepareData(data,dir)                   // clean of filtered dirs and exts, sort by name and put directories first
     pad=this.getPadding(level)                        // spaces from this.pad
     
     count=list.length
@@ -105,6 +111,7 @@ exports.ScanDirectory.prototype={
         
         json.push({
           text: self.fixEncoding(value),                    // special json formatting for jsTree.js                   
+          icon: self.dirIcon,
           children: res
         })
       }
@@ -146,7 +153,7 @@ exports.ScanDirectory.prototype={
   },
   
   /*
-   * Merge folders and files
+   * Merge folders and files arrays
    */
   getList: function(folders,files){
     folders.sort()
@@ -263,6 +270,17 @@ exports.ScanDirectory.prototype={
       }
     }
     
+    if(useDefault){
+      for(var i in this.codeExts){
+        var item=this.codeExts[i]
+        if(ext==item){
+          icon=path+"code"+iconExt
+          useDefault=false
+          break
+        }
+      }
+    }
+    
     return icon
   },
   
@@ -283,7 +301,7 @@ exports.ScanDirectory.prototype={
   
   /*
    * Filters file extensions and returns true if the file will be included in the output
-   * If exlude filter is not empty ignores the include filter
+   * If exclude filter is not empty ignores the include filter
    */
   filterFile: function(value){
     if(this.excludeExt){
@@ -372,7 +390,7 @@ exports.ScanDirectory.prototype={
 // --------------------------------------------- exports ---------------------------------------------
   
   /*
-   * Exports text in a .txt file
+   * Exports text to a .txt file in 'export/text'
    */
   exportText: function(text){
     var exportPath, ext, filename
@@ -383,7 +401,7 @@ exports.ScanDirectory.prototype={
   },
   
   /*
-   * Exports markup in a .hmtl file
+   * Exports HTML markup to a .hmtl file in 'export/markup'
    */
   exportMarkup: function(){
     var exportPath, ext, filename, markup
