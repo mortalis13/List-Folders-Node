@@ -1,8 +1,6 @@
 
 # List Folders (Node.js version)
 
-*See [`small-projects`](https://github.com/mortalis13/small-projects/tree/master/list-folders/node-js) repository `list-folders/node-js` folder*
-
 ## Requirements
 
 1. MySQL server running and database `list_folders_node` created.  
